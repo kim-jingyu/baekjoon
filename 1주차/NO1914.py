@@ -12,7 +12,17 @@ def print_process(n, start, end):
     print_process(n - 1, 6 - start - end, end)
 
 
+def move(level, start, target):
+    if level > 1:
+        move(level - 1, start, 6 - start - target)
+
+    print(f'원반 [{level}]을 {start}기둥에서 {target}기둥으로 옮깁니다.')
+
+    if level > 1:
+        move(level - 1, 6 - start - target, target)
+
+
 value = int(sys.stdin.readline().rstrip())
 print(2 ** value - 1)
 if value <= 20:
-    print_process(value, 1, 3)
+    move(value, 1, 3)
