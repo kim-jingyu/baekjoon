@@ -1,63 +1,59 @@
 import sys
 from collections import deque
-sys.setrecursionlimit(10 ** 6)
-
-input = lambda: sys.stdin.readline().rstrip()
-
-N, M = map(int, input().split())  # 행, 열
-board = [list(map(int, input().split())) for _ in range(N)]
-
-dy = [-1, 1, 0, 0]
-dx = [0, 0, -1, 1]
-year = 0
+input = sys.stdin.readline
 
 
-# 빙산의 위치 i, j를 받아와서 빙산 주변 바다 갯수 카운트
-def bfs(y, x):
-    queue = deque([(y, x)])
-    visited[y][x] = True
+def bfs(x, y):
+    q = deque([(x, y)])
+    visited[x][y] = 1
+    seaList = []
 
-    while queue:
-        y, x = queue.popleft()
-
-        for k in range(4):
-            ny = y + dy[k]
-            nx = x + dx[k]
-
-            if 0 <= ny < N and 0 <= nx < M and not visited[ny][nx]:
-                # 빙산이라면 큐에 추가
-                if board[ny][nx]:
-                    visited[ny][nx] = True
-                    queue.append((ny, nx))
-                # 빙산이 아니라면 바닷물로 카운트
-                else:
-                    cnt[y][x] += 1
+    while q:
+        x, y = q.popleft()
+        sea = 0
+        for i in range(4):
+            nx = x + dx[i]
+            ny = y + dy[i]
+            if 0 <= nx < n and 0 <= ny < m:
+                if not graph[nx][ny]:
+                    sea += 1
+                elif graph[nx][ny] and not visited[nx][ny]:
+                    q.append((nx, ny))
+                    visited[nx][ny] = 1
+        if sea > 0:
+            seaList.append((x, y, sea))
+    for x, y, sea in seaList:
+        graph[x][y] = max(0, graph[x][y] - sea)
 
     return 1
 
 
-while True:
-    answer = []
-    visited = [[False] * M for _ in range(N)]
-    cnt = [[0] * M for _ in range(N)]
+n, m = map(int, input().split())
+graph = [list(map(int, input().split())) for _ in range(n)]
+check = False
+ice = []
+for i in range(n):
+    for j in range(m):
+        if graph[i][j]:
+            ice.append((i, j))
 
-    # 빙산과 접촉되어 있는 바닷물 확인
-    for i in range(N):
-        for j in range(M):
-            if board[i][j] and not visited[i][j]:
-                answer.append(bfs(i, j))
+dx = [-1, 1, 0, 0]
+dy = [0, 0, -1, 1]
+year = 0
 
-    # 빙산 깍아주기
-    for i in range(N):
-        for j in range(M):
-            board[i][j] -= cnt[i][j]
-            if board[i][j] < 0:
-                board[i][j] = 0
-
-    # 빙산 그룹이 없거나 2 덩어리 이상이라면
-    if len(answer) == 0 or len(answer) >= 2:
+while ice:
+    visited = [[0] * m for _ in range(n)]
+    delList = []
+    group = 0
+    for i, j in ice:
+        if graph[i][j] and not visited[i][j]:
+            group += bfs(i, j)
+        if graph[i][j] == 0:
+            delList.append((i, j))
+    if group > 1:
+        check = True
         break
-
+    ice = sorted(list(set(ice) - set(delList)))
     year += 1
 
-print(year) if len(answer) >= 2 else print(0)
+print(year) if check else print(0)
