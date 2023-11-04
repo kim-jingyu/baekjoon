@@ -10,3 +10,4 @@ new_words = sorted(words, key=lambda w: (len(w), w))
 
 for word in new_words:
     print(word)
+
